@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-intro">
+  <div><span class="eyebrow">BUILD YOUR HEALTH TIMELINE</span>
+    <h1>{% if values.get('pending_upload') %}Review extracted details{% else %}Add a health record{% endif %}</h1>
+    <p class="muted">Upload a report to prefill fields, or enter the details yourself.</p>
+  </div><a class="btn btn-ghost" href="{{ url_for('records') }}">← Back to records</a>
+</div>
+<div class="add-record-layout">
+  <section class="panel upload-panel">
+    <div class="upload-heading"><span class="upload-icon">⇧</span>
+      <div>
+        <h2>Import a document</h2>
+        <p>PDF or photo · up to 12 MB</p>
+      </div>
+    </div>
+    <form method="post" action="{{ url_for('extract_upload') }}" enctype="multipart/form-data" class="upload-dropzone">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="upload-graphic"><span>▤</span><i>✧</i></div><strong>Drop your report here or browse</strong>
+      <p>Prescription, lab result, scan summary or discharge note</p>
+      <label class="file-picker">Choose file<input id="medical-file-input" type="file" name="medical_file"
+          accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" required></label>
+      <div id="selected-file-name" class="selected-file-name" role="status" aria-live="polite">No file selected</div>
+      <small>Text extraction is a best-effort convenience. Always verify names, dates, values and clinical
+        details.</small>
+      <button type="submit" class="btn btn-secondary btn-block">Extract & review fields <span>→</span></button>
+    </form>
+    {% if uploaded_filename %}<div class="attached-pending"><span>📎</span>
+      <div><strong>{{ uploaded_filename }}</strong><small>Attached to this unsaved record</small></div><span
+        class="status-dot"></span>
+    </div>{% endif %}
+  </section>
+  <section class="record-form-section">
+    <div class="form-section-heading">
+      <div><span class="section-number">01</span>
+        <div>
+          <h2>Record details</h2>
+          <p>Confirm or correct every field before saving.</p>
+        </div>
+      </div><span class="required-note">* Required</span>
+    </div>
+    <form method="post" action="{{ url_for('create_record') }}" class="panel medical-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="pending_upload" value="{{ values.get('pending_upload', '') }}">
+      <div class="form-grid">
+        <label class="span-2">Record title *<input name="title" required maxlength="180"
+            value="{{ values.get('title', '') }}" placeholder="e.g. Thyroid function test"></label>
+        <label>Patient name *<input name="patient_name" required maxlength="120"
+            value="{{ values.get('patient_name', '') }}"></label>
+        <label>Record date *<input name="record_date" type="date" required
+            value="{{ values.get('record_date', '') }}"></label>
+        <label>Doctor name<input name="doctor_name" maxlength="160" value="{{ values.get('doctor_name', '') }}"
+            placeholder="Dr. …"></label>
+        <label>Hospital / clinic<input name="hospital_name" maxlength="180"
+            value="{{ values.get('hospital_name', '') }}" placeholder="Provider or diagnostic lab"></label>
+        <label>Cost (₹)<input name="cost" type="number" min="0" step="0.01" value="{{ values.get('cost', '') }}"
+            placeholder="e.g. 850"></label>
+        <label>Health category *<select name="category" required>{% for c in categories %}<option value="{{ c }}" {% if
+              values.get('category')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+        <label>Reported severity *<select name="severity" required>{% for s in severities %}<option value="{{ s }}" {%
+              if values.get('severity')==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select><small
+            class="field-help">Based on the report / clinician's wording. Not an AI diagnosis.</small></label>
+        <label>Diagnosis / reason<input name="diagnosis" maxlength="1500" value="{{ values.get('diagnosis', '') }}"
+            placeholder="As documented, or leave blank"></label>
+        <label>Test name (if relevant)<input name="test_type" maxlength="120" value="{{ values.get('test_type', '') }}"
+            placeholder="e.g. CBC, HbA1c, ECG"></label>
+        <label class="span-2">Medications mentioned<textarea name="medications" rows="2" maxlength="1500"
+            placeholder="Names only; confirm dose and instructions from the original prescription">{{ values.get('medications', '') }}</textarea></label>
+        <label class="span-2">Your notes<textarea name="notes" rows="3" maxlength="4000"
+            placeholder="Follow-up date, questions for the doctor, or context">{{ values.get('notes', '') }}</textarea></label>
+        {% if values.get('extracted_text') %}<details class="span-2 extracted-details">
+          <summary>View extracted text from the uploaded report</summary><textarea name="extracted_text" rows="8"
+            maxlength="50000" spellcheck="false">{{ values.get('extracted_text', '') }}</textarea><small>You can correct
+            OCR mistakes here. The original attachment is also retained.</small>
+        </details>{% else %}<input type="hidden" name="extracted_text" value="">{% endif %}
+      </div>
+      <div class="form-footer">
+        <p><span>🔒</span> Saved to your account. Only you can access it unless you create a share link.</p><button
+          type="submit" class="btn btn-primary">Save record <span>→</span></button>
+      </div>
+    </form>
+  </section>
+</div>
+<div class="notice notice-warm"><strong>Severity is not triage</strong>
+  <p>Record labels organise your history; they do not assess how urgently you need care. Never delay emergency care
+    because of an app label.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const input = document.getElementById('medical-file-input');
+    const filename = document.getElementById('selected-file-name');
+    if (!input || !filename) return;
+    input.addEventListener('change', function () {
+      if (!input.files || input.files.length === 0) {
+        filename.textContent = 'No file selected';
+        filename.classList.remove('has-file');
+        return;
+      }
+      const file = input.files[0];
+      const sizeMB = file.size / (1024 * 1024);
+      filename.textContent = file.name + ' (' + (sizeMB < 0.1 ? Math.max(1, Math.round(file.size / 1024)) + ' KB' : sizeMB.toFixed(2) + ' MB') + ')';
+      filename.classList.add('has-file');
+      if (file.size > 12 * 1024 * 1024) {
+        filename.textContent += ' — exceeds the 12 MB limit';
+        filename.classList.remove('has-file');
+      }
+    });
+  })();
+</script>
+{% endblock %}

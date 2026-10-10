@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ff">
+  <title>{{ page_title or 'HealthTrail' }} · HealthTrail</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell {% if not current_user() and request.endpoint in ['login', 'signup'] %}auth-shell{% elif not current_user() %}guest-shell{% endif %}">
+    {% if current_user() %}
+    <aside class="sidebar">
+      <a href="{{ url_for('dashboard') }}" class="brand">
+        <span class="brand-mark">✚</span>
+        <span><strong>HealthTrail</strong><small>your health, connected</small></span>
+      </a>
+      <div class="nav-label">YOUR SPACE</div>
+      <nav class="side-nav">
+        <a class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span>⌂</span> Overview</a>
+        <a class="nav-item {% if request.endpoint in ['records', 'record_detail', 'new_record', 'extract_upload', 'edit_record'] %}active{% endif %}" href="{{ url_for('records') }}"><span>▤</span> Medical records</a>
+        <a class="nav-item {% if request.endpoint == 'new_record' %}active{% endif %}" href="{{ url_for('new_record') }}"><span>＋</span> Add a record</a>
+        <a class="nav-item {% if request.endpoint == 'emergency_card' %}active{% endif %}" href="{{ url_for('emergency_card') }}"><span>♡</span> Emergency summary</a>
+      </nav>
+      <div class="nav-label">CONTROL & SHARE</div>
+      <nav class="side-nav">
+        <a class="nav-item {% if request.endpoint in ['sharing', 'public_share'] %}active{% endif %}" href="{{ url_for('sharing') }}"><span>♧</span> Share access</a>
+        <a class="nav-item {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}"><span>☻</span> Health profile</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-mini"><span>🔒</span><div><strong>Your records, your call</strong><p>Sharing links expire and can be revoked.</p></div></div>
+        <div class="user-mini"><span class="avatar">{{ current_user()['full_name'][:1]|upper }}</span><div class="user-mini-text"><strong>{{ current_user()['full_name'] }}</strong><small>@{{ current_user()['username'] }}</small></div>
+          <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="logout-icon" type="submit" title="Sign out" aria-label="Sign out">↪</button></form>
+        </div>
+      </div>
+    </aside>
+    {% endif %}
+
+    <main class="main-area {% if not current_user() and request.endpoint in ['login', 'signup'] %}auth-main{% elif not current_user() %}guest-main{% endif %}">
+      {% if current_user() %}
+      <header class="topbar">
+        <div class="breadcrumb"><span>HealthTrail</span><span class="crumb-sep">/</span><strong>{{ page_title or 'Overview' }}</strong></div>
+        <div class="topbar-actions"><span class="secure-pill"><span class="secure-dot"></span> Private workspace</span><a class="topbar-add" href="{{ url_for('new_record') }}">＋ Add record</a></div>
+      </header>
+      {% endif %}
+      <div class="content-wrap {% if not current_user() and request.endpoint in ['login', 'signup'] %}auth-content{% elif not current_user() %}guest-content{% endif %}">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                {% if category == 'sharelink' and message.startswith('SHARE_LINK_CREATED:') %}
+                  <div class="flash flash-share"><div><strong>🔗 Share link created</strong><p>Anyone with this link can access the selected health summary until it expires. Send it only to a trusted clinician.</p><input id="new-share-url" class="share-link-input" readonly value="{{ message[19:] }}"></div><button type="button" class="btn btn-small btn-secondary" onclick="copyShareLink()">Copy link</button></div>
+                {% else %}
+                  <div class="flash flash-{{ 'success' if category == 'success' else ('error' if category == 'error' else 'info') }}"><span>{{ '✓' if category == 'success' else ('!' if category == 'error' else 'i') }}</span><p>{{ message }}</p><button type="button" class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button></div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+        <footer class="page-footer"><span>HealthTrail · A student-built continuity-of-care prototype</span><span>Demo records are synthetic · Not for medical diagnosis</span></footer>
+      </div>
+    </main>
+  </div>
+  <script>
+    function copyShareLink() {
+      const field = document.getElementById('new-share-url');
+      if (!field) return;
+      field.select(); field.setSelectionRange(0, 99999);
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(field.value).then(() => alert('Share link copied.'));
+      } else {
+        document.execCommand('copy'); alert('Share link copied.');
+      }
+    }
+    document.querySelectorAll('[data-confirm]').forEach(form => form.addEventListener('submit', event => {
+      if (!confirm(form.dataset.confirm)) event.preventDefault();
+    }));
+  </script>
+</body>
+</html>

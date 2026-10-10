@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-intro"><div><span class="eyebrow">KEEP YOUR HISTORY ACCURATE</span><h1>Edit record</h1><p class="muted">Correct dates, provider details and notes as needed.</p></div><a class="btn btn-ghost" href="{{ url_for('record_detail', record_id=record['id']) }}">← Cancel</a></div>
+<form method="post" action="{{ url_for('update_record', record_id=record['id']) }}" class="panel medical-form standalone-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="pending_upload" value=""><div class="form-grid">
+<label class="span-2">Record title *<input name="title" required value="{{ values.get('title','') }}"></label>
+<label>Patient name *<input name="patient_name" required value="{{ values.get('patient_name','') }}"></label><label>Record date *<input type="date" name="record_date" required value="{{ values.get('record_date','') }}"></label>
+<label>Doctor name<input name="doctor_name" value="{{ values.get('doctor_name','') }}"></label><label>Hospital / clinic<input name="hospital_name" value="{{ values.get('hospital_name','') }}"></label>
+<label>Cost (₹)<input type="number" min="0" step="0.01" name="cost" value="{{ values.get('cost','') }}"></label><label>Health category *<select name="category" required>{% for c in categories %}<option value="{{ c }}" {% if values.get('category')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+<label>Reported severity *<select name="severity" required>{% for s in severities %}<option value="{{ s }}" {% if values.get('severity')==s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></label><label>Diagnosis / reason<input name="diagnosis" value="{{ values.get('diagnosis','') }}"></label>
+<label>Test name<input name="test_type" value="{{ values.get('test_type','') }}"></label><label class="span-2">Medications mentioned<textarea name="medications" rows="2">{{ values.get('medications','') }}</textarea></label>
+<label class="span-2">Your notes<textarea name="notes" rows="3">{{ values.get('notes','') }}</textarea></label>
+<label class="span-2">Extracted text<textarea name="extracted_text" rows="6">{{ values.get('extracted_text','') }}</textarea></label>
+</div><div class="form-footer"><p>Changes apply to your saved record.</p><button class="btn btn-primary" type="submit">Save changes →</button></div></form>
+{% endblock %}

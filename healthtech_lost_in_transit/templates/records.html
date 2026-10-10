@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-intro">
+  <div><span class="eyebrow">YOUR PERSONAL ARCHIVE</span>
+    <h1>Medical records</h1>
+    <p class="muted">Search across visits, providers, costs, categories and report details.</p>
+  </div><a class="btn btn-primary" href="{{ url_for('new_record') }}">＋ Add a record</a>
+</div>
+<section class="panel search-panel">
+  <form method="get" action="{{ url_for('records') }}" class="search-form">
+    <label class="search-field"><span>⌕</span><input name="q" value="{{ filters.q }}"
+        placeholder="Search any field — doctor, test, medication, cost…"><button type="submit"
+        class="btn btn-primary btn-small">Search</button></label>
+    <div class="filter-grid">
+      <label>Health category<select name="category">
+          <option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if
+            filters.category==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select></label>
+      <label>Reported severity<select name="severity">
+          <option value="">All severities</option>{% for s in severities %}<option value="{{ s }}" {% if
+            filters.severity==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select></label>
+      <label>Hospital / clinic<input name="hospital" value="{{ filters.hospital }}" placeholder="Provider name"></label>
+      <label>From date<input type="date" name="start_date" value="{{ filters.start_date }}"></label>
+      <label>To date<input type="date" name="end_date" value="{{ filters.end_date }}"></label>
+      <div class="filter-actions"><a class="btn btn-ghost btn-small" href="{{ url_for('records') }}">Clear filters</a>
+      </div>
+    </div>
+  </form>
+</section>
+<div class="results-heading"><strong>{{ records|length }} result{{ '' if records|length == 1 else 's'
+    }}</strong><span>Showing up to 300 records · newest first</span></div>
+{% if records %}<section class="panel table-panel">
+  <div class="table-scroll">
+    <table class="records-table">
+      <thead>
+        <tr>
+          <th>RECORD</th>
+          <th>DATE</th>
+          <th>PROVIDER</th>
+          <th>CATEGORY</th>
+          <th>SEVERITY</th>
+          <th>COST</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}<tr>
+          <td><a class="table-title" href="{{ url_for('record_detail', record_id=r['id']) }}">{{ r['title']
+              }}</a><small>{{ r['diagnosis'] or r['test_type'] or 'No summary added' }}</small></td>
+          <td class="nowrap">{{ r['record_date'] }}</td>
+          <td><strong class="provider-name">{{ r['hospital_name'] or '—' }}</strong><small>{{ r['doctor_name'] or
+              'Doctor not listed' }}</small></td>
+          <td><span class="category-chip">{{ r['category'] }}</span></td>
+          <td><span class="severity severity-{{ r['severity']|lower }}">{{ r['severity'] }}</span></td>
+          <td class="cost-cell">{% if r['cost'] is not none %}₹{{ '{:,.2f}'.format(r['cost']) }}{% else %}—{% endif %}
+          </td>
+          <td><a class="icon-link" href="{{ url_for('record_detail', record_id=r['id']) }}"
+              aria-label="Open record">↗</a></td>
+        </tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>{% else %}<section class="panel empty-state large-empty"><span>⌕</span>
+  <h3>No records match those filters</h3>
+  <p>Try another keyword or clear the filters to browse the full timeline.</p><a class="btn btn-secondary"
+    href="{{ url_for('records') }}">Clear filters</a>
+</section>{% endif %}
+<div class="notice notice-soft"><strong>Privacy tip</strong>
+  <p>Search is limited to your signed-in account. Records and attachments are not publicly indexed.</p>
+</div>
+{% endblock %}

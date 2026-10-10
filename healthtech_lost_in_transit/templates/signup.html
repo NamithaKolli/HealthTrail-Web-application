@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-layout signup-layout">
+  <section class="auth-illustration signup-illustration">
+    <div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div>
+    <div class="illustration-icons"><span class="float-icon icon-record">▤</span><span class="float-icon icon-heart">♡</span><span class="float-icon icon-cross">✚</span><span class="float-icon icon-shield">🔒</span></div>
+    <div class="hero-copy"><span class="eyebrow">START YOUR TIMELINE</span><h1>Less repeating.<br>More continuity.</h1><p>A calmer way to organise your medical history before the next appointment, move or emergency.</p></div>
+    <div class="auth-stat-row"><div><strong>Patient-owned</strong><small>You control access</small></div><div><strong>All in one place</strong><small>Reports and key details</small></div></div>
+  </section>
+  <section class="auth-form-panel"><div class="auth-form-card"><div class="mobile-brand"><span class="brand-mark">✚</span><strong>HealthTrail</strong></div><span class="eyebrow">CREATE ACCOUNT</span><h2>Make your health space</h2><p class="muted">Use a memorable username and a strong password.</p>
+    <form method="post" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Full name<input name="full_name" autocomplete="name" required maxlength="120" placeholder="Your full name" value="{{ request.form.get('full_name', '') }}"></label>
+      <label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="40" pattern="[A-Za-z0-9_.-]{3,40}" placeholder="3–40 letters, numbers, . _ -" value="{{ request.form.get('username', '') }}"></label>
+      <label>Password<input name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
+      <label>Confirm password<input name="confirm_password" type="password" autocomplete="new-password" minlength="8" required placeholder="Enter it again"></label>
+      <button class="btn btn-primary btn-block" type="submit">Create my account <span>→</span></button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+    <div class="notice notice-warm"><strong>Prototype privacy note</strong><p>Use synthetic data for judging. This student prototype is not certified for real patient information.</p></div>
+  </div></section>
+</div>
+{% endblock %}

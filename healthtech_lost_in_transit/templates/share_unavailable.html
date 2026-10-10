@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="unavailable-wrap"><div class="unavailable-icon">🔐</div><span class="eyebrow">ACCESS CLOSED</span><h1>This share link is no longer available</h1><p class="muted">It may have expired, been revoked by the patient, or the link may be invalid. Ask the patient to create a new temporary link if access is still needed.</p><a class="btn btn-primary" href="{{ url_for('login') }}">Open HealthTrail <span>→</span></a></div>
+{% endblock %}

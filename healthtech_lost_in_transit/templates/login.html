@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-layout">
+  <section class="auth-illustration">
+    <div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div>
+    <div class="illustration-icons"><span class="float-icon icon-record">▤</span><span class="float-icon icon-heart">♡</span><span class="float-icon icon-cross">✚</span><span class="float-icon icon-shield">🔒</span></div>
+    <div class="hero-copy"><span class="eyebrow">CARE THAT CONNECTS</span><h1>Your health story<br>should travel with you.</h1><p>Keep every prescription, lab report and consultation in one secure, patient-controlled timeline.</p></div>
+    <div class="auth-stat-row"><div><strong>One timeline</strong><small>Every provider, one view</small></div><div><strong>Your permission</strong><small>Share. Expire. Revoke.</small></div></div>
+  </section>
+  <section class="auth-form-panel">
+    <div class="auth-form-card"><div class="mobile-brand"><span class="brand-mark">✚</span><strong>HealthTrail</strong></div><span class="eyebrow">WELCOME BACK</span><h2>Sign in to your space</h2><p class="muted">Pick up where your health journey left off.</p>
+      <form method="post" class="form-stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Username<input name="username" autocomplete="username" required placeholder="e.g. namitha_cse" value="{{ request.form.get('username', '') }}"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Enter your password"></label>
+        <button class="btn btn-primary btn-block" type="submit">Sign in <span>→</span></button>
+      </form>
+      <p class="auth-switch">New to HealthTrail? <a href="{{ url_for('signup') }}">Create an account</a></p>
+      {% if demo_enabled %}<div class="demo-credentials"><span>✦</span><div><strong>Try the demo workspace</strong><p>Username <code>demo</code> · Password <code>Demo@123</code></p><small>All demo health records are fictional.</small></div></div>{% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: healthtrail-demo
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /var/data/healthtransit.db
+      - key: UPLOAD_FOLDER
+        value: /var/data/uploads
+      - key: COOKIE_SECURE
+        value: "1"
+    disk:
+      name: healthtrail-data
+      mountPath: /var/data
+      sizeGB: 1

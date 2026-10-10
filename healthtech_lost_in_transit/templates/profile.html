@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-intro"><div><span class="eyebrow">YOUR INFORMATION, YOUR CONTROL</span><h1>Health profile</h1><p class="muted">Keep key context ready for your next appointment or handover.</p></div><a class="btn btn-secondary" href="{{ url_for('emergency_card') }}">View emergency summary ↗</a></div>
+<div class="profile-layout"><aside class="panel profile-intro-card"><div class="profile-avatar">{{ user['full_name'][:1]|upper }}</div><h2>{{ user['full_name'] }}</h2><p>@{{ user['username'] }}</p><span class="secure-pill"><span class="secure-dot"></span> Private by default</span><div class="profile-note"><span>♡</span><p>Accurate allergies and current medications can make a handover more useful. Confirm them against the original prescription.</p></div></aside>
+<section class="panel profile-form-panel"><div class="panel-heading"><div><h2>Personal health snapshot</h2><p>Included in a shared summary only when you create one.</p></div><span class="panel-icon">✎</span></div><form method="post" class="profile-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Full name *<input name="full_name" required value="{{ user['full_name'] }}"></label>
+<label>Known allergies<textarea name="allergies" rows="3" placeholder="List the allergy and any documented reaction, if known">{{ user['allergies'] }}</textarea><small>Write “none known” only when that is accurate.</small></label>
+<label>Current medications<textarea name="current_medications" rows="3" placeholder="Medication names; verify dose from current prescription">{{ user['current_medications'] }}</textarea></label>
+<label>Long-term conditions<textarea name="chronic_conditions" rows="3" placeholder="e.g. diabetes, hypertension, asthma (as diagnosed by a clinician)">{{ user['chronic_conditions'] }}</textarea></label>
+<label>Emergency contact<input name="emergency_contact" value="{{ user['emergency_contact'] }}" maxlength="200" placeholder="Name and phone, if you choose to store it"></label>
+<div class="form-footer"><p>Profile details are snapshot-copied when a share link is created.</p><button type="submit" class="btn btn-primary">Save health profile →</button></div></form></section></div>
+<div class="notice notice-warm"><strong>Sharing reminder</strong><p>Only include information you are comfortable sharing. Anyone with an active share URL can view that snapshot until it expires or you revoke it.</p></div>
+{% endblock %}
